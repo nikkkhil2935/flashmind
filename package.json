@@ -29,7 +29,7 @@
     "immer": "latest",
     "lucide-react": "^0.454.0",
     "next": "14.2.16",
-    "next-themes": "^0.3.1",
+    "next-themes": "^0.2.1",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "latest",
