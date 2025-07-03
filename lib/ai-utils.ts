@@ -9,29 +9,34 @@ export function extractJson(raw: unknown): string {
   const text = raw.trim()
   if (!text) return "[]"
 
-  // 1. Look for ```json ... ``` or ``` ... ``` fenced blocks
-  const fencedMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)
-  if (fencedMatch && fencedMatch[1]) {
-    return fencedMatch[1].trim()
-  }
+  try {
+    // 1. Look for \`\`\`json ... \`\`\` or \`\`\` ... \`\`\` fenced blocks
+    const fencedMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)
+    if (fencedMatch && fencedMatch[1]) {
+      return fencedMatch[1].trim()
+    }
 
-  // 2. Fallback – try to grab from first '[' to last ']'
-  const first = text.indexOf("[")
-  const last = text.lastIndexOf("]")
-  if (first !== -1 && last !== -1 && last > first) {
-    return text.slice(first, last + 1).trim()
-  }
+    // 2. Fallback – try to grab from first '[' to last ']'
+    const first = text.indexOf("[")
+    const last = text.lastIndexOf("]")
+    if (first !== -1 && last !== -1 && last > first) {
+      return text.slice(first, last + 1).trim()
+    }
 
-  // 3. Last resort - try to find JSON object
-  const objFirst = text.indexOf("{")
-  const objLast = text.lastIndexOf("}")
-  if (objFirst !== -1 && objLast !== -1 && objLast > objFirst) {
-    const jsonStr = text.slice(objFirst, objLast + 1)
-    // Wrap single object in array
-    return `[${jsonStr}]`
-  }
+    // 3. Last resort - try to find JSON object
+    const objFirst = text.indexOf("{")
+    const objLast = text.lastIndexOf("}")
+    if (objFirst !== -1 && objLast !== -1 && objLast > objFirst) {
+      const jsonStr = text.slice(objFirst, objLast + 1)
+      // Wrap single object in array
+      return `[${jsonStr}]`
+    }
 
-  return "[]"
+    return "[]"
+  } catch (error) {
+    console.error("Error extracting JSON:", error)
+    return "[]"
+  }
 }
 
 /**
