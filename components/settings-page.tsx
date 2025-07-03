@@ -59,7 +59,7 @@ export function SettingsPage() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your account and application preferences</p>
+        <p className="text-gray-600 mt-1">Manage your FlashMind account and application preferences</p>
       </div>
 
       {/* Profile Settings */}

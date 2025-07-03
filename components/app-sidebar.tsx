@@ -58,12 +58,17 @@ export function AppSidebar() {
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">FM</span>
+        <Link href="/" className="flex items-center gap-3 px-2 py-3 hover:opacity-80 transition-opacity">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-lg">F</span>
           </div>
-          <span className="font-bold text-lg">FlashMind</span>
-        </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              FlashMind
+            </span>
+            <span className="text-xs text-gray-500 -mt-1">AI Learning</span>
+          </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>

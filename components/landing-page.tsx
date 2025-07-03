@@ -77,10 +77,17 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">FM</span>
-              </div>
-              <span className="font-bold text-xl">FlashMind</span>
+              <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">F</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    FlashMind
+                  </span>
+                  <span className="text-xs text-gray-500 -mt-1">AI Learning</span>
+                </div>
+              </Link>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
@@ -272,12 +279,15 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">FM</span>
+              <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">F</span>
                 </div>
-                <span className="font-bold text-xl">FlashMind</span>
-              </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-xl text-white">FlashMind</span>
+                  <span className="text-xs text-gray-400 -mt-1">AI Learning</span>
+                </div>
+              </Link>
               <p className="text-gray-400">AI-powered learning platform for the modern student.</p>
             </div>
             <div>

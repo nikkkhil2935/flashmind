@@ -355,7 +355,7 @@ export function FlashcardViewer() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Flashcards</h1>
-          <p className="text-gray-600 mt-1">Review and study your flashcard collection</p>
+          <p className="text-gray-600 mt-1">Review and study your FlashMind flashcard collection</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={shuffleCards} variant="outline" size="sm">
