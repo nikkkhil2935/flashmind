@@ -1,5 +1,6 @@
 import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { google } from "@ai-sdk/google"
+import { extractJson, validateFlashcard, sanitizeFlashcard } from "@/lib/ai-utils"
 import { type NextRequest, NextResponse } from "next/server"
 
 interface FlashcardRequest {
@@ -33,9 +34,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Content is too long. Please limit to 50,000 characters." }, { status: 400 })
     }
 
+    // Check if API key is available
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      return NextResponse.json({ error: "AI service is not configured. Please contact support." }, { status: 500 })
+    }
+
     const { text } = await generateText({
-      model: openai("gpt-4o", {
-        apiKey: process.env.OPEN_AI_KEY,
+      model: google("gemini-1.5-flash", {
+        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
       }),
       system: `You are an expert educational content creator specializing in creating high-quality flashcards for effective learning.
 
@@ -78,12 +84,8 @@ Return only the JSON array of flashcard objects.`,
 
     let flashcards: GeneratedFlashcard[]
     try {
-      // Clean the response to ensure it's valid JSON
-      const cleanedText = text
-        .trim()
-        .replace(/^```json\s*/, "")
-        .replace(/\s*```$/, "")
-      flashcards = JSON.parse(cleanedText)
+      const cleaned = extractJson(text)
+      flashcards = JSON.parse(cleaned)
     } catch (parseError) {
       console.error("JSON parsing error:", parseError)
       console.error("Raw response:", text)
@@ -96,17 +98,9 @@ Return only the JSON array of flashcard objects.`,
     }
 
     // Validate each flashcard
-    const validatedFlashcards = flashcards.filter((card) => {
-      return (
-        card.question &&
-        card.answer &&
-        card.difficulty &&
-        Array.isArray(card.tags) &&
-        typeof card.question === "string" &&
-        typeof card.answer === "string" &&
-        ["easy", "medium", "hard"].includes(card.difficulty)
-      )
-    })
+    const validatedFlashcards = flashcards
+      .filter(validateFlashcard)
+      .map((card) => sanitizeFlashcard(card, subject, topic))
 
     if (validatedFlashcards.length === 0) {
       return NextResponse.json({ error: "No valid flashcards were generated. Please try again." }, { status: 500 })
