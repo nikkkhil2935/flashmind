@@ -1,128 +1,149 @@
-# FlashMind 🧠
+# FlashMind - AI-Powered Flashcard Generator 🧠
 
-An intelligent flashcard learning platform combining document-style note-taking with spaced repetition and AI-powered flashcard generation.
-
-## 🚀 Features
-
-- **Rich Text Editor** — Like Google Docs or Word, for creating study notes.
-- **Automated Flashcard Generation** — Uses OpenAI (or your chosen AI endpoint) to convert notes into Q&A flashcards.
-- **Spaced Repetition System (SRS)** — Optimizes review schedules to help retention.
-- **Full CRUD** — Create, read, update, and delete flashcards and documents.
-- **Responsive & Intuitive UI** — Cross-device friendly.
-
-## 💡 Why FlashMind?
-
-Inspired by Anki, FlashMind boosts learning efficiency by blending familiar document editing with smart flashcard creation and advanced scheduling algorithms.
+Transform any content into smart, AI-generated flashcards. Upload PDFs, images, or YouTube videos, and study smarter with adaptive quizzes, performance tracking, and a clean, modern UI.
 
 ---
 
-## 🛠️ Technology Stack
+## 🚀 Quick Deploy
 
-| Layer       | Tech Stack                      |
-|-------------|---------------------------------|
-| Frontend    | Angular, HTML, CSS, TypeScript  |
-| UI Library  | PO-UI (PrimeNG, PO UI, etc.)   |
-| Backend     | Java, Spring Boot              |
-| Database    | PostgreSQL                     |
-| AI API      | OpenAI API                     |
-| DevOps      | Docker, Docker Compose         |
+### Deploy to Vercel (Recommended)
+
+1. **Fork this repository**
+2. Go to [vercel.com](https://vercel.com)
+3. Click **"New Project"**
+4. Import your forked repo
+5. Configure the environment variables (see below)
+6. Hit **Deploy**
 
 ---
 
-## 🔧 Getting Started
+## 🔧 Environment Variables
 
-### Prerequisites
+Add these in your Vercel **Project Settings > Environment Variables**:
 
-- Docker & Docker Compose installed
-- [OpenAI API key] or AI endpoint credentials
-- A running PostgreSQL DB (or configured in Docker Compose)
+```env
+# Supabase Configuration
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE=your-service-role-key
 
-### Setup Steps
-
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/nikkkhil2935/flashmind.git
-   cd flashmind
+# OpenAI API Key
+OPENAI_KEY=sk-********************************
 
 
-Create a .env file (place next to docker-compose.yml) with:
-OPENAI_API_KEY=your_key_here
-SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flashmind
-SPRING_DATASOURCE_USERNAME=your_pg_user
-SPRING_DATASOURCE_PASSWORD=your_pg_password
+🧪 Local Development
+# Clone the repo
+git clone https://github.com/yourusername/flashmind.git
+cd flashmind
 
-Launch everything with Docker Compose
-
-docker-compose up -d
-Access the app
-
-Frontend: http://localhost:4200
-
-Backend API: http://localhost:8080/api
-
-🧠 Usage
-Sign up / log in.
-
-Create or edit a document using the rich-text editor.
-
-Click “Generate Flashcards” to use AI or create manually.
-
-Study flashcards in SRS mode daily.
-
-Track your study analytics and progress.
-
-🧩 Extending the App
-🔧 Swap AI Engine — My setup uses OpenAI, but you can plug in any AI source.
-
-🌐 Add Users/Roles — Extend backend to support multiple user profiles.
-
-🌍 Internationalization — Translate UI to other languages.
-
-🔒 Security — Implement JWT, OAuth, etc.
-
-📱 Mobile Version — Use Ionic or other frameworks to port to mobile.
-
-✅ Running Tests
-bash
-Copy
-Edit
-# Backend (if tests are setup)
-cd FlashMindAPI
-./gradlew test
-
-# Frontend
-cd FlashMindClient
+# Install dependencies
 npm install
-npm test
-📝 Environmental Variables
-OPENAI_API_KEY: Your OpenAI key
 
-SPRING_DATASOURCE_URL: JDBC URL to Postgres
+# Setup environment
+cp .env.example .env.local
+# (Add your env vars to .env.local)
 
-SPRING_DATASOURCE_USERNAME
+# Run dev server
+npm run dev
 
-SPRING_DATASOURCE_PASSWORD
+📋 Setup Checklist
+ GitHub repository forked
 
-(Add any other required env vars here)
+ Supabase project created
 
-🚢 Deployment
-Build Docker images:
+ Database tables initialized (scripts/create-tables.sql)
 
-bash
-Copy
-Edit
-docker-compose build
-Push to container registry (e.g., Docker Hub).
+ Google OAuth configured in Supabase
 
-Deploy on cloud providers like AWS ECS, GCP Cloud Run, Azure, or DigitalOcean.
+ OpenAI API key obtained
+
+ Environment variables set in Vercel
+
+ Authorized domain added to Supabase Auth settings
+
+📚 Features
+🔐 Google Authentication via Supabase Auth
+
+📤 Multi-Format Upload: PDFs, Images, YouTube videos
+
+🤖 AI Flashcard Generation with GPT-4 and GPT-4 Vision
+
+📊 Progress Tracking and Performance Analytics
+
+🎯 Adaptive Quiz Mode based on user knowledge level
+
+🎨 Modern UI/UX with Framer Motion and Tailwind CSS
+
+📱 Fully Responsive for mobile, tablet, and desktop
+
+🏗️ Tech Stack
+Layer	Tech Used
+Frontend	Next.js 14, TypeScript, Tailwind CSS
+Backend	Next.js API Routes
+Auth	Supabase Auth (Google OAuth)
+AI Engine	OpenAI GPT-4 + GPT-4 Vision
+Database	PostgreSQL (via Supabase)
+DevOps	Vercel (CI/CD + Hosting)
+Animations	Framer Motion
+
+
+📁 Project Structure
+flashmind/
+├── app/                    # Next.js app directory
+│   ├── api/                # API routes
+│   ├── auth/               # Auth pages (login, signup)
+│   ├── dashboard/          # User dashboard
+│   ├── generate/           # Flashcard generation flow
+│   └── globals.css         # Global styles
+├── components/             # UI components
+│   └── ui/                 # Buttons, inputs, cards, etc.
+├── lib/                    # Utilities and API clients
+├── scripts/                # DB initialization scripts
+└── public/                 # Static assets
+
+🔐 Security Highlights
+Supabase Row Level Security (RLS)
+
+CSRF protection and secure HTTP headers
+
+Environment variable validation
+
+OAuth login with restricted domain access
+
+🙌 Contributing
+We love community contributions! Here's how you can help:
+
+Fork the repository
+
+Create a branch (git checkout -b feature/awesome-feature)
+
+Commit your changes (git commit -m 'Add awesome feature')
+
+Push to GitHub (git push origin feature/awesome-feature)
+
+Create a Pull Request and describe your changes
 
 📄 License
-Distributed under the MIT License. See LICENSE file for details.
+This project is licensed under the MIT License.
+See the LICENSE file for more information.
 
-📬 Contact
-For questions or feedback, reach out:
+🙏 Acknowledgements
+OpenAI for providing GPT models
 
-GitHub profile: nikkkhil2935
+Supabase for instant backend
+
+Vercel for blazing-fast deployment
+
+Tailwind CSS and Framer Motion for stunning UI
+
+You – the learner, the builder, the future 🤍
+
+Built with ❤️ to make learning fun, fast, and unforgettable.
 
 
-
+Let me know if you'd like:
+- a downloadable `.md` file
+- a SASS version of the UI
+- sample `.env.local`
+- database schema SQL file (`create-tables.sql`)  
+Happy hacking!
