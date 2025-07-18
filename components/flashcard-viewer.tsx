@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/components/auth/auth-provider"
 import {
   ChevronLeft,
   ChevronRight,
@@ -32,27 +31,24 @@ interface Flashcard {
   tags: string[]
   subject: string
   topic: string
-  last_reviewed?: string
+  lastReviewed?: string
   accuracy?: number
-  review_count: number
-  is_mastered: boolean
+  reviewCount: number
 }
 
 interface FlashcardSet {
   id: string
-  name: string
   subject: string
   topic: string
   flashcards: Flashcard[]
-  created_at: string
-  last_studied?: string
-  total_cards: number
-  mastered_cards: number
-  average_accuracy: number
+  createdAt: string
+  lastStudied?: string
+  totalCards: number
+  masteredCards: number
+  averageAccuracy: number
 }
 
 export function FlashcardViewer() {
-  const { user } = useAuth()
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([])
   const [currentSetIndex, setCurrentSetIndex] = useState(0)
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
@@ -61,35 +57,125 @@ export function FlashcardViewer() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [studyMode, setStudyMode] = useState(false)
   const { toast } = useToast()
 
+  // Load flashcard sets on component mount
   useEffect(() => {
-    if (user) {
-      loadFlashcardSets()
-    }
-  }, [user])
+    loadFlashcardSets()
+  }, [])
 
   const loadFlashcardSets = async () => {
-    if (!user) return
-
     try {
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`/api/flashcards?userId=${user.id}`)
+      const response = await fetch("/api/flashcards?userId=default-user")
 
       if (!response.ok) {
         throw new Error("Failed to load flashcards")
       }
 
       const data = await response.json()
-      setFlashcardSets(data.flashcardSets || [])
+
+      if (data.flashcardSets && data.flashcardSets.length > 0) {
+        setFlashcardSets(data.flashcardSets)
+      } else {
+        // Create sample flashcards for demonstration
+        const sampleSets = createSampleFlashcards()
+        setFlashcardSets(sampleSets)
+      }
     } catch (error) {
       console.error("Error loading flashcards:", error)
       setError("Failed to load flashcards. Please try refreshing the page.")
+
+      // Fallback to sample data
+      const sampleSets = createSampleFlashcards()
+      setFlashcardSets(sampleSets)
     } finally {
       setLoading(false)
     }
+  }
+
+  const createSampleFlashcards = (): FlashcardSet[] => {
+    const sampleFlashcards: Flashcard[] = [
+      {
+        id: "1",
+        question: "What is the powerhouse of the cell?",
+        answer:
+          "The mitochondria is the powerhouse of the cell. It produces ATP through cellular respiration and is responsible for generating most of the cell's energy through the process of oxidative phosphorylation.",
+        difficulty: "easy",
+        tags: ["biology", "cell", "organelles", "energy"],
+        subject: "Biology",
+        topic: "Cell Biology",
+        lastReviewed: "2 hours ago",
+        accuracy: 95,
+        reviewCount: 5,
+      },
+      {
+        id: "2",
+        question: "Explain the process of photosynthesis and its importance",
+        answer:
+          "Photosynthesis is the process by which plants convert light energy into chemical energy. It occurs in chloroplasts and involves two main stages: light-dependent reactions (in thylakoids) and light-independent reactions (Calvin cycle in stroma). This process is crucial for life on Earth as it produces oxygen and glucose.",
+        difficulty: "medium",
+        tags: ["biology", "plants", "energy", "chloroplasts"],
+        subject: "Biology",
+        topic: "Plant Biology",
+        lastReviewed: "1 day ago",
+        accuracy: 78,
+        reviewCount: 3,
+      },
+      {
+        id: "3",
+        question: "What is DNA replication and when does it occur?",
+        answer:
+          "DNA replication is the process of copying DNA molecules before cell division. It occurs during the S phase of the cell cycle and involves unwinding the double helix, synthesizing new complementary strands using DNA polymerase, and proofreading for errors. This ensures each daughter cell receives an identical copy of genetic information.",
+        difficulty: "hard",
+        tags: ["biology", "genetics", "DNA", "cell cycle"],
+        subject: "Biology",
+        topic: "Genetics",
+        lastReviewed: "3 days ago",
+        accuracy: 65,
+        reviewCount: 2,
+      },
+      {
+        id: "4",
+        question: "What are the main types of chemical bonds?",
+        answer:
+          "The main types of chemical bonds are: 1) Ionic bonds (transfer of electrons between atoms), 2) Covalent bonds (sharing of electrons), and 3) Metallic bonds (delocalized electrons in metals). Each type has different properties and occurs in different types of compounds.",
+        difficulty: "medium",
+        tags: ["chemistry", "bonds", "electrons", "atoms"],
+        subject: "Chemistry",
+        topic: "Chemical Bonding",
+        accuracy: 82,
+        reviewCount: 4,
+      },
+    ]
+
+    return [
+      {
+        id: "sample-set-1",
+        subject: "Biology",
+        topic: "General Biology",
+        flashcards: sampleFlashcards.filter((card) => card.subject === "Biology"),
+        createdAt: new Date().toISOString(),
+        lastStudied: "2 hours ago",
+        totalCards: 3,
+        masteredCards: 2,
+        averageAccuracy: 79,
+      },
+      {
+        id: "sample-set-2",
+        subject: "Chemistry",
+        topic: "Chemical Bonding",
+        flashcards: sampleFlashcards.filter((card) => card.subject === "Chemistry"),
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        lastStudied: "1 day ago",
+        totalCards: 1,
+        masteredCards: 1,
+        averageAccuracy: 82,
+      },
+    ]
   }
 
   const currentSet = flashcardSets[currentSetIndex]
@@ -166,65 +252,48 @@ export function FlashcardViewer() {
     }
   }
 
-  const markAsKnown = async () => {
-    if (currentCard && user) {
-      try {
-        // Update flashcard as mastered
-        await fetch("/api/flashcards", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
+  const recordStudyActivity = async (cardId: string, isCorrect: boolean) => {
+    try {
+      await fetch("/api/progress", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          activity: {
+            type: "flashcard_review",
+            cardId,
+            isCorrect,
+            timeSpent: 30,
+            subject: currentCard.subject,
+            topic: currentCard.topic,
           },
-          body: JSON.stringify({
-            id: currentCard.id,
-            updates: {
-              is_mastered: true,
-              review_count: currentCard.review_count + 1,
-              correct_count: (currentCard.accuracy || 0) + 1,
-              last_reviewed: new Date().toISOString(),
-            },
-            userId: user.id,
-          }),
-        })
-
-        toast({
-          title: "Great job! 🎉",
-          description: "Card marked as mastered. Keep up the excellent work!",
-        })
-        nextCard()
-      } catch (error) {
-        console.error("Error updating flashcard:", error)
-      }
+        }),
+      })
+    } catch (error) {
+      console.error("Error recording study activity:", error)
     }
   }
 
-  const markAsUnknown = async () => {
-    if (currentCard && user) {
-      try {
-        // Update flashcard review count
-        await fetch("/api/flashcards", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: currentCard.id,
-            updates: {
-              review_count: currentCard.review_count + 1,
-              last_reviewed: new Date().toISOString(),
-            },
-            userId: user.id,
-          }),
-        })
+  const markAsKnown = () => {
+    if (currentCard) {
+      recordStudyActivity(currentCard.id, true)
+      toast({
+        title: "Great job! 🎉",
+        description: "Card marked as known. Keep up the excellent work!",
+      })
+      nextCard()
+    }
+  }
 
-        toast({
-          title: "No worries! 📚",
-          description: "This card will appear more frequently for review.",
-        })
-        nextCard()
-      } catch (error) {
-        console.error("Error updating flashcard:", error)
-      }
+  const markAsUnknown = () => {
+    if (currentCard) {
+      recordStudyActivity(currentCard.id, false)
+      toast({
+        title: "No worries! 📚",
+        description: "This card will appear more frequently for review.",
+      })
+      nextCard()
     }
   }
 
@@ -312,7 +381,9 @@ export function FlashcardViewer() {
                 Previous Set
               </Button>
               <div className="text-center">
-                <p className="font-semibold text-lg">{currentSet.name}</p>
+                <p className="font-semibold text-lg">
+                  {currentSet.subject} - {currentSet.topic}
+                </p>
                 <p className="text-sm text-gray-600">
                   Set {currentSetIndex + 1} of {flashcardSets.length}
                 </p>
@@ -356,8 +427,8 @@ export function FlashcardViewer() {
       <div className="text-center">
         <p className="text-sm text-gray-600">
           Card {currentCardIndex + 1} of {filteredCards.length}
-          {filteredCards.length !== currentSet.total_cards && (
-            <span className="text-gray-500"> (filtered from {currentSet.total_cards})</span>
+          {filteredCards.length !== currentSet.totalCards && (
+            <span className="text-gray-500"> (filtered from {currentSet.totalCards})</span>
           )}
         </p>
       </div>
@@ -381,10 +452,10 @@ export function FlashcardViewer() {
                       {currentCard.difficulty.toUpperCase()}
                     </Badge>
                     <Badge variant="outline" className="border-blue-200 text-blue-700">
-                      {currentSet.subject}
+                      {currentCard.subject}
                     </Badge>
                     <Badge variant="outline" className="border-purple-200 text-purple-700">
-                      {currentSet.topic}
+                      {currentCard.topic}
                     </Badge>
                   </div>
 
@@ -436,10 +507,8 @@ export function FlashcardViewer() {
                     ))}
                   </div>
 
-                  {currentCard.last_reviewed && (
-                    <p className="text-sm text-gray-500">
-                      Last reviewed: {new Date(currentCard.last_reviewed).toLocaleDateString()}
-                    </p>
+                  {currentCard.lastReviewed && (
+                    <p className="text-sm text-gray-500">Last reviewed: {currentCard.lastReviewed}</p>
                   )}
 
                   {/* Study Feedback Buttons */}
@@ -497,6 +566,10 @@ export function FlashcardViewer() {
           <RotateCcw className="h-4 w-4 mr-2" />
           Flip Card
         </Button>
+        <Button variant="outline" onClick={() => setStudyMode(!studyMode)}>
+          <BookOpen className="h-4 w-4 mr-2" />
+          {studyMode ? "Exit" : "Enter"} Study Mode
+        </Button>
       </div>
 
       {/* Progress Indicator */}
@@ -526,15 +599,15 @@ export function FlashcardViewer() {
           <h3 className="font-semibold text-lg mb-4 text-center text-gray-800">Study Progress</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             <div>
-              <p className="text-3xl font-bold text-blue-600">{currentSet.total_cards}</p>
+              <p className="text-3xl font-bold text-blue-600">{currentSet.totalCards}</p>
               <p className="text-sm text-blue-700 font-medium">Total Cards</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-green-600">{currentSet.mastered_cards}</p>
+              <p className="text-3xl font-bold text-green-600">{currentSet.masteredCards}</p>
               <p className="text-sm text-green-700 font-medium">Mastered</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-purple-600">{Math.round(currentSet.average_accuracy)}%</p>
+              <p className="text-3xl font-bold text-purple-600">{currentSet.averageAccuracy}%</p>
               <p className="text-sm text-purple-700 font-medium">Average Accuracy</p>
             </div>
           </div>

@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/components/auth/auth-provider"
 import {
   Loader2,
   Brain,
@@ -62,7 +61,6 @@ interface QuizSession {
 }
 
 export function QuizMode() {
-  const { user } = useAuth()
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState("")
   const [showAnswer, setShowAnswer] = useState(false)
@@ -101,8 +99,6 @@ export function QuizMode() {
   }
 
   const startQuiz = async () => {
-    if (!user) return
-
     setLoading(true)
     setGenerating(true)
 
@@ -136,26 +132,22 @@ export function QuizMode() {
       }
 
       // Start quiz session tracking
-      const sessionResponse = await fetch("/api/quiz-sessions", {
+      const sessionResponse = await fetch("/api/quiz", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           action: "start",
-          userId: user.id,
-          subject: data.metadata.subject,
-          topic: data.metadata.topic,
           difficulty,
-          totalQuestions: data.questions.length,
-          metadata: data.metadata,
+          questionTypes: ["multiple-choice", "fill-blank", "true-false"],
         }),
       })
 
       let sessionId = "local-session"
       if (sessionResponse.ok) {
         const sessionData = await sessionResponse.json()
-        sessionId = sessionData.session?.id || sessionId
+        sessionId = sessionData.quizSession?.id || sessionId
       }
 
       const newSession: QuizSession = {
@@ -198,7 +190,7 @@ export function QuizMode() {
   }
 
   const submitAnswer = async () => {
-    if (!quizSession || !currentQuestion || !selectedAnswer.trim() || !user) return
+    if (!quizSession || !currentQuestion || !selectedAnswer.trim()) return
 
     setAnswerSubmitted(true)
 
@@ -218,19 +210,16 @@ export function QuizMode() {
     setShowAnswer(true)
 
     try {
-      await fetch("/api/quiz-sessions", {
+      await fetch("/api/quiz", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           action: "answer",
-          userId: user.id,
-          sessionId: quizSession.id,
-          questionText: currentQuestion.question,
-          questionType: currentQuestion.type,
-          userAnswer: selectedAnswer,
-          correctAnswer: currentQuestion.answer,
+          quizId: quizSession.id,
+          questionIndex: quizSession.currentQuestion,
+          answer: selectedAnswer,
           isCorrect: correct,
           timeSpent: 30,
           hintUsed: showHint,
@@ -307,30 +296,14 @@ export function QuizMode() {
     }
   }
 
-  const handleQuizComplete = async () => {
-    if (!quizSession || !user) return
+  const handleQuizComplete = () => {
+    if (!quizSession) return
 
     const updatedSession = {
       ...quizSession,
       status: "completed" as const,
     }
     setQuizSession(updatedSession)
-
-    try {
-      await fetch("/api/quiz-sessions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "complete",
-          userId: user.id,
-          sessionId: quizSession.id,
-        }),
-      })
-    } catch (error) {
-      console.error("Error completing quiz:", error)
-    }
 
     const percentage = Math.round((quizSession.score / quizSession.questions.length) * 100)
     let message = "Quiz completed!"
@@ -453,7 +426,7 @@ export function QuizMode() {
 
             <Button
               onClick={startQuiz}
-              disabled={loading || generating || !user}
+              disabled={loading || generating}
               size="lg"
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-base sm:text-lg py-4 sm:py-6"
             >
